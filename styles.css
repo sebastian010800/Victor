@@ -1,0 +1,854 @@
+:root {
+  --rojo: #c0262d;
+  --rojo-oscuro: #8e1820;
+  --rojo-claro: #e4565b;
+  --verde: #1d5c3f;
+  --verde-oscuro: #0f3a27;
+  --verde-claro: #2f7a55;
+  --crema: #fbf7ef;
+  --blanco: #ffffff;
+  --oro: #e3b448;
+  --tinta: #1f2a24;
+
+  --alto: 100vh;
+  --serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --curva: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@supports (height: 100dvh) {
+  :root { --alto: 100dvh; }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: var(--alto);
+  overflow: hidden;
+  background: var(--verde-oscuro);
+  color: var(--tinta);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+img { display: block; max-width: 100%; }
+button { font: inherit; }
+
+/* ---------- Detalles navideños compartidos ---------- */
+
+.nieve {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.copo {
+  position: absolute;
+  top: -10px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: caer linear infinite;
+}
+@keyframes caer {
+  to { transform: translate3d(var(--deriva, 20px), calc(var(--alto) + 20px), 0); }
+}
+
+.arbol-deco {
+  position: absolute;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  width: clamp(34px, 6vmin, 72px);
+  height: calc(clamp(34px, 6vmin, 72px) * 1.35);
+  color: var(--verde);
+  opacity: 0.9;
+  pointer-events: none;
+}
+.arbol-izq { left: clamp(12px, 3vw, 40px); }
+.arbol-der {
+  right: clamp(12px, 3vw, 40px);
+  transform: scale(0.78);
+  transform-origin: bottom center;
+}
+
+/* ============================================================
+   Salvapantallas
+   ============================================================ */
+
+.salva {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  overflow: hidden;
+  background: var(--crema);
+  color: rgba(192, 38, 45, 0.18);
+  cursor: pointer;
+  transition: opacity 0.6s ease, visibility 0.6s;
+}
+.salva.oculto {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.salva-reticula {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(29, 92, 63, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 92, 63, 0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.escena {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1200px;
+}
+
+/* ---------- Carpeta ---------- */
+
+.carpeta-wrap {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(24px) scale(0.82);
+  transition: opacity 0.55s var(--curva), transform 0.55s var(--curva), filter 0.55s;
+}
+.carpeta-wrap.entra { opacity: 1; transform: none; }
+.carpeta-wrap.sale { opacity: 0; transform: scale(1.35); filter: blur(6px); }
+
+.carpeta {
+  position: relative;
+  width: clamp(200px, 38vmin, 470px);
+  height: clamp(152px, 29vmin, 360px);
+  transform-style: preserve-3d;
+}
+.carpeta.clic { animation: hundir 0.45s ease; }
+@keyframes hundir {
+  40% { transform: scale(0.94); }
+  80% { transform: scale(1.04); }
+}
+
+.carpeta-pestana {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 42%;
+  height: 18%;
+  border-radius: 14px 14px 0 0;
+  background: linear-gradient(180deg, var(--verde-claro), var(--verde));
+}
+.carpeta-cuerpo {
+  position: absolute;
+  inset: 12% 0 0;
+  border-radius: 18px;
+  background: linear-gradient(160deg, var(--rojo), var(--rojo-oscuro));
+  box-shadow: 0 26px 50px -18px rgba(142, 24, 32, 0.65);
+}
+.carpeta-tapa {
+  position: absolute;
+  inset: 26% 0 0;
+  border-radius: 18px;
+  transform-origin: bottom;
+  background: linear-gradient(160deg, var(--rojo-claro), var(--rojo));
+  box-shadow: inset 0 -6px 18px rgba(0, 0, 0, 0.18);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* Cinta de regalo sobre la tapa: un guiño navideño discreto. */
+.carpeta-tapa::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 9%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.85);
+}
+.carpeta.abierta .carpeta-tapa { transform: rotateX(-72deg); }
+
+.carpeta-etiqueta {
+  margin: clamp(14px, 2.6vmin, 26px) 0 0;
+  padding: 0 16px;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(1.2rem, 4vmin, 2.4rem);
+  color: var(--verde-oscuro);
+  text-align: center;
+}
+
+/* ---------- Cursor ---------- */
+
+.cursor {
+  position: absolute;
+  z-index: 30;
+  width: clamp(38px, 7vmin, 78px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(42vmin, 38vmin) scale(1.1);
+  transition: transform 0.95s var(--curva), opacity 0.4s;
+}
+.cursor svg {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 6px 10px rgba(15, 23, 42, 0.35));
+}
+.cursor.entra { opacity: 1; transform: translate(3vmin, 4vmin); }
+.cursor.clic { opacity: 1; transform: translate(3vmin, 4vmin) scale(0.86); transition-duration: 0.22s; }
+.cursor.sale { opacity: 0; transform: translate(3vmin, 4vmin) scale(0.9); }
+
+.cursor-onda {
+  position: absolute;
+  left: -40%;
+  top: -40%;
+  width: 180%;
+  height: 180%;
+  border: 2px solid rgba(192, 38, 45, 0.7);
+  border-radius: 50%;
+  opacity: 0;
+}
+.cursor.clic .cursor-onda { animation: onda 0.6s ease-out; }
+@keyframes onda {
+  from { transform: scale(0.2); opacity: 0.8; }
+  to { transform: scale(1.6); opacity: 0; }
+}
+
+/* ---------- Pila de fotos ---------- */
+
+.pila {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  --alto-foto: clamp(250px, 64vmin, 760px);
+}
+.foto-carta {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: auto;
+  border: clamp(6px, 1.1vmin, 14px) solid var(--blanco);
+  border-radius: clamp(14px, 2.4vmin, 26px);
+  background: var(--blanco);
+  overflow: hidden;
+  box-shadow: 0 34px 70px -24px rgba(15, 23, 42, 0.5);
+  opacity: 0;
+  transform: translate(-50%, -50%) translate(var(--x, 0), var(--y, 60px)) rotate(var(--r, 0deg)) scale(var(--s, 0.9));
+  transition: transform 0.5s var(--curva), opacity 0.5s var(--curva);
+}
+.foto-carta img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.foto-carta.visible { opacity: 1; }
+.foto-carta.descartada {
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s;
+}
+.pila.sale .foto-carta { opacity: 0; }
+
+/* ---------- Cierre ---------- */
+
+.cierre {
+  position: absolute;
+  padding: 0 20px;
+  text-align: center;
+  opacity: 0;
+  transform: scale(0.88);
+  transition: opacity 0.6s var(--curva), transform 0.6s var(--curva);
+}
+.cierre.entra { opacity: 1; transform: none; }
+.cierre-pre {
+  margin: 0 0 0.4em;
+  font-size: clamp(0.85rem, 2.4vmin, 1.3rem);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--verde);
+}
+.cierre-titulo {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 9vmin, 6.5rem);
+  line-height: 1.05;
+  color: var(--rojo);
+  text-wrap: balance;
+}
+.cierre-titulo span { color: var(--verde); }
+
+.salva-pista {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(clamp(18px, 4vmin, 40px), env(safe-area-inset-bottom));
+  margin: 0;
+  padding: 0 clamp(60px, 14vw, 140px);
+  text-align: center;
+  font-size: clamp(0.8rem, 2vmin, 1.05rem);
+  font-weight: 500;
+  color: var(--verde);
+  animation: latido 2.4s ease-in-out infinite;
+}
+@keyframes latido {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+/* ============================================================
+   Cartas
+   ============================================================ */
+
+.cartas {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.5);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(47, 122, 85, 0.55), transparent 60%),
+    radial-gradient(ellipse at 50% 110%, rgba(192, 38, 45, 0.22), transparent 55%),
+    var(--verde-oscuro);
+  padding:
+    env(safe-area-inset-top)
+    env(safe-area-inset-right)
+    env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+.contenido {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cartas-cabecera {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: clamp(10px, 2.2vh, 22px) 16px clamp(6px, 1.2vh, 12px);
+}
+.cartas-cabecera h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(1.05rem, 3.2vmin, 1.7rem);
+  color: var(--crema);
+  letter-spacing: 0.01em;
+}
+.arbol-mini {
+  width: clamp(16px, 2.6vmin, 24px);
+  height: calc(clamp(16px, 2.6vmin, 24px) * 1.35);
+  color: #4c9a6f;
+}
+
+/* ---------- Carrusel ---------- */
+
+.carrusel {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  touch-action: pan-y pinch-zoom;
+}
+.pista {
+  display: flex;
+  height: 100%;
+  transition: transform 0.65s var(--curva);
+  will-change: transform;
+}
+.diapositiva {
+  flex: 0 0 100%;
+  min-width: 0;
+  height: 100%;
+  padding: clamp(6px, 1.4vh, 16px) 16px clamp(10px, 2vh, 20px);
+  opacity: 0.35;
+  transform: scale(0.92);
+  transition: opacity 0.65s var(--curva), transform 0.65s var(--curva);
+}
+.diapositiva.activa { opacity: 1; transform: none; }
+
+/* La hoja es la que tiene scroll: el carrusel queda fijo y solo se mueve la
+   carta, así en el celular se lee de arriba abajo sin perder las flechas. */
+.hoja {
+  position: relative;
+  height: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: clamp(12px, 2vmin, 20px);
+  background: var(--crema);
+  box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.7);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(29, 92, 63, 0.4) transparent;
+}
+/* Franja de bastón de caramelo arriba de cada hoja. */
+.hoja::before {
+  content: "";
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: block;
+  height: 7px;
+  background: repeating-linear-gradient(-45deg, var(--rojo) 0 10px, var(--blanco) 10px 20px, var(--verde) 20px 30px, var(--blanco) 30px 40px);
+}
+.hoja-pagina {
+  width: 100%;
+  height: auto;
+  cursor: zoom-in;
+}
+/* Botón para ampliar, pegado abajo de la hoja mientras se hace scroll. */
+.ampliar {
+  position: sticky;
+  bottom: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -52px 12px 12px auto;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--verde-oscuro);
+  color: var(--crema);
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+}
+.ampliar svg { width: 16px; height: 16px; }
+
+/* ---------- Visor de carta ampliada ---------- */
+
+.visor {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(8, 28, 19, 0.97);
+}
+.visor[hidden] { display: none; }
+.visor-scroll {
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+/* En el celular, una vez y media el ancho de la pantalla: se lee más grande
+   que en el recuadro sin quedar enorme, y se puede seguir con zoom de dedos. */
+.visor-scroll img {
+  width: max(100%, min(150vw, 1100px));
+  max-width: none;
+  margin: 0 auto;
+}
+.visor-cerrar {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--rojo);
+  color: var(--blanco);
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+}
+.visor-cerrar svg { width: 22px; height: 22px; }
+.hoja-pagina + .hoja-pagina { border-top: 1px dashed rgba(29, 92, 63, 0.25); }
+
+/* ---------- Carta de Meraki ---------- */
+
+.meraki {
+  padding: clamp(20px, 4vmin, 44px) clamp(18px, 4vmin, 48px) clamp(22px, 4vmin, 44px);
+  text-align: center;
+}
+.meraki-pre {
+  margin: 0;
+  font-size: clamp(0.72rem, 1.8vmin, 0.85rem);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--verde);
+}
+.meraki-titulo {
+  margin: 0.2em 0 0.5em;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(2rem, 7vmin, 3.6rem);
+  line-height: 1.05;
+  color: var(--rojo);
+}
+.meraki-texto {
+  max-width: 60ch;
+  margin: 0 auto;
+  font-family: var(--serif);
+  font-size: clamp(1rem, 2.4vmin, 1.18rem);
+  line-height: 1.65;
+  color: var(--tinta);
+  text-wrap: pretty;
+}
+.meraki-texto p { margin: 0 0 1em; }
+.meraki-firma {
+  margin: 0.4em 0 0;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(1.05rem, 2.6vmin, 1.3rem);
+  color: var(--verde);
+}
+.meraki-paginas { margin: 0 calc(-1 * clamp(18px, 4vmin, 48px)) clamp(16px, 3vmin, 28px); }
+
+/* Cuadro de fotos: columnas que suben y bajan alternadas. */
+.collage {
+  --cols: 4;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: clamp(6px, 1vmin, 10px);
+  height: clamp(240px, 42vh, 520px);
+  margin-top: clamp(20px, 4vmin, 36px);
+  padding: clamp(6px, 1vmin, 10px);
+  overflow: hidden;
+  border-radius: clamp(12px, 2vmin, 18px);
+  background: var(--verde-oscuro);
+  box-shadow: inset 0 0 0 3px var(--rojo), inset 0 0 0 6px var(--crema);
+}
+.collage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(var(--verde-oscuro), transparent 12%, transparent 88%, var(--verde-oscuro));
+}
+.collage-col {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 1vmin, 10px);
+  animation: subir var(--duracion, 30s) linear infinite;
+  animation-play-state: paused;
+}
+.collage-col.baja { animation-name: bajar; }
+.diapositiva.activa .collage-col { animation-play-state: running; }
+/* Cada columna lleva su contenido dos veces: al llegar a -50% está en el
+   mismo punto que en 0 y el loop no tiene costura. El gap se compensa. */
+@keyframes subir {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(-50% - clamp(6px, 1vmin, 10px) / 2)); }
+}
+@keyframes bajar {
+  from { transform: translateY(calc(-50% - clamp(6px, 1vmin, 10px) / 2)); }
+  to { transform: translateY(0); }
+}
+.collage-foto {
+  width: 100%;
+  border-radius: clamp(8px, 1.4vmin, 12px);
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Navegación ---------- */
+
+.navegacion {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 2vw, 16px);
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+  padding: clamp(8px, 1.6vh, 14px) 16px clamp(12px, 2.2vh, 22px);
+}
+.flecha {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: clamp(44px, 6vmin, 56px);
+  height: clamp(44px, 6vmin, 56px);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--rojo);
+  color: var(--blanco);
+  cursor: pointer;
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.6);
+  transition: background 0.2s, transform 0.2s, opacity 0.2s;
+}
+.flecha svg { width: 55%; height: 55%; }
+.flecha:hover:not(:disabled) { background: var(--rojo-claro); }
+.flecha:active:not(:disabled) { transform: scale(0.94); }
+.flecha:disabled { opacity: 0.3; cursor: default; }
+.flecha:focus-visible, .nombre:focus-visible {
+  outline: 2px solid var(--oro);
+  outline-offset: 3px;
+}
+
+.nombres {
+  position: relative; /* referencia de offsetLeft al centrar el nombre activo */
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  justify-content: safe center;
+  padding: 4px 0;
+  list-style: none;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+}
+.nombres::-webkit-scrollbar { display: none; }
+.nombres li { flex: none; }
+/* El margen de los extremos va en los items: Chrome no cuenta el padding final
+   de un contenedor con scroll, y el último nombre quedaba cortado. */
+.nombres li:first-child { padding-left: 14px; }
+.nombres li:last-child { padding-right: 14px; }
+.nombre {
+  padding: 8px 14px;
+  border: 1px solid rgba(251, 247, 239, 0.22);
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(251, 247, 239, 0.75);
+  font-size: clamp(0.82rem, 1.9vmin, 0.95rem);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.25s, color 0.25s, border-color 0.25s;
+}
+.nombre:hover { border-color: rgba(251, 247, 239, 0.5); color: var(--crema); }
+.nombre[aria-current="true"] {
+  border-color: var(--crema);
+  background: var(--crema);
+  color: var(--rojo);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .nieve { display: none; }
+}
+
+.hoja:focus { outline: none; }
+.hoja:focus-visible { outline: 2px solid var(--oro); outline-offset: 3px; }
+
+/* ---------- Galería ---------- */
+
+.galeria {
+  padding: clamp(20px, 4vmin, 44px) clamp(14px, 3vmin, 36px) clamp(22px, 4vmin, 40px);
+  text-align: center;
+}
+/* Columnas tipo mosaico: cada foto o video conserva su forma sin dejar huecos. */
+.galeria-grilla {
+  columns: 3 220px;
+  column-gap: clamp(10px, 1.8vmin, 16px);
+  margin-top: clamp(14px, 3vmin, 26px);
+}
+.galeria-item {
+  break-inside: avoid;
+  margin: 0 0 clamp(10px, 1.8vmin, 16px);
+}
+.galeria-item img,
+.galeria-item video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: clamp(10px, 1.6vmin, 14px);
+  background: var(--verde-oscuro);
+}
+.galeria-item img {
+  cursor: zoom-in;
+  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.6);
+}
+.galeria-item video {
+  max-height: 70vh;
+  aspect-ratio: 9 / 16;
+  object-fit: contain;
+  box-shadow: 0 0 0 3px var(--crema), 0 0 0 5px var(--rojo);
+}
+.galeria-item figcaption {
+  margin-top: 10px;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(0.95rem, 2.2vmin, 1.1rem);
+  color: var(--verde);
+}
+
+/* Una foto en el visor se ve entera, encajada en la pantalla. */
+.visor-foto .visor-scroll {
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.visor-foto .visor-scroll img {
+  width: auto;
+  max-width: 100%;
+  max-height: calc(var(--alto) - 32px);
+  border-radius: 12px;
+}
+
+/* ---------- Menú lateral y flechas (escritorio) ---------- */
+
+.lateral,
+.hamburguesa,
+.flecha-lado { display: none; }
+
+.lateral {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  flex-direction: column;
+  width: 250px;
+  padding: 22px 14px 22px 18px;
+  overflow-y: auto;
+  background: rgba(6, 26, 17, 0.55);
+  border-right: 1px solid rgba(251, 247, 239, 0.1);
+  transition: margin-left 0.45s var(--curva), opacity 0.35s;
+}
+.lateral-titulo {
+  margin: 0 0 14px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(251, 247, 239, 0.55);
+}
+.lateral-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lateral-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(251, 247, 239, 0.8);
+  font-size: 0.98rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.lateral-item:hover { background: rgba(251, 247, 239, 0.08); color: var(--crema); }
+.lateral-num {
+  font-family: var(--serif);
+  font-size: 0.85rem;
+  color: rgba(251, 247, 239, 0.45);
+  font-variant-numeric: tabular-nums;
+}
+.lateral-item[aria-current="true"] {
+  background: var(--crema);
+  color: var(--rojo);
+  font-weight: 600;
+}
+.lateral-item[aria-current="true"] .lateral-num { color: var(--verde); }
+.lateral-item:focus-visible,
+.hamburguesa:focus-visible {
+  outline: 2px solid var(--oro);
+  outline-offset: 2px;
+}
+
+.hamburguesa {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgba(251, 247, 239, 0.22);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--crema);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.hamburguesa:hover { background: rgba(251, 247, 239, 0.1); }
+.hamburguesa svg { width: 22px; height: 22px; }
+
+.flecha-lado {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  transform: translateY(-50%);
+}
+.flecha-lado:active:not(:disabled) { transform: translateY(-50%) scale(0.94); }
+.flecha-izq { left: 22px; }
+.flecha-der { right: 22px; }
+/* En los extremos la flecha que no lleva a ningún lado desaparece. */
+.flecha-lado:disabled { opacity: 0; pointer-events: none; }
+
+@media (min-width: 900px) {
+  .lateral { display: flex; }
+  .hamburguesa { display: grid; }
+  .flecha-lado { display: grid; }
+  .navegacion { display: none; }
+  .cartas.lateral-cerrado .lateral { margin-left: -250px; opacity: 0; }
+  /* Espacio a los lados de la hoja para las flechas. */
+  .diapositiva { padding-left: 96px; padding-right: 96px; padding-bottom: clamp(16px, 3vh, 28px); }
+}
+
+/* ---------- Cartas completas dentro del recuadro (celular) ---------- */
+
+@media (max-width: 899px) {
+  .hoja-carta {
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: 7px;
+  }
+  /* Cada página ocupa justo el alto del recuadro y se ve entera; si la carta
+     tiene varias, se pasa de una a otra deslizando hacia arriba. */
+  .hoja-carta .hoja-pagina {
+    height: calc(100% - 7px);
+    object-fit: contain;
+    scroll-snap-align: start;
+  }
+}
+
+.mas-paginas { display: none; }
+@media (max-width: 899px) {
+  .mas-paginas {
+    position: absolute;
+    left: 50%;
+    bottom: 76px;
+    z-index: 2;
+    display: block;
+    margin: 0;
+    padding: 7px 14px;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: rgba(15, 58, 39, 0.9);
+    color: var(--crema);
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    animation: latido 2.4s ease-in-out infinite;
+  }
+  .mas-paginas.oculto { opacity: 0 !important; animation: none; }
+}

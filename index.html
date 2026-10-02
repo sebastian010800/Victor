@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Feliz cumpleaños, Victor</title>
+  <meta name="theme-color" content="#0f3a27">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Arbolito reutilizable: va de detalle en esquinas, nunca al centro. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="arbol" viewBox="0 0 40 54">
+      <path d="M20 6 L33 24 H26 L36 37 H27 L38 48 H2 L13 37 H4 L14 24 H7 Z" fill="currentColor"/>
+      <rect x="17" y="48" width="6" height="6" rx="1" fill="#7a4a2a"/>
+      <path d="M20 0 l1.8 3.7 4 .5 -3 2.8 .8 4 -3.6-2 -3.6 2 .8-4 -3-2.8 4-.5z" fill="#e3b448"/>
+      <circle cx="16" cy="30" r="1.6" fill="#c0262d"/>
+      <circle cx="25" cy="41" r="1.6" fill="#c0262d"/>
+      <circle cx="22" cy="18" r="1.3" fill="#fff"/>
+      <circle cx="12" cy="43" r="1.3" fill="#fff"/>
+    </symbol>
+  </svg>
+
+  <!-- ============ Salvapantallas ============ -->
+  <section id="salvapantallas" class="salva" aria-label="Feliz cumpleaños Victor. Toca para ver las cartas">
+    <div class="salva-reticula" aria-hidden="true"></div>
+    <div class="nieve" aria-hidden="true"></div>
+
+    <div class="escena">
+      <div class="carpeta-wrap">
+        <div class="carpeta">
+          <div class="carpeta-pestana"></div>
+          <div class="carpeta-cuerpo"></div>
+          <div class="carpeta-tapa"></div>
+        </div>
+        <p class="carpeta-etiqueta">Feliz cumpleaños Victor</p>
+      </div>
+
+      <div class="cursor" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M5 2.5 L5 19.5 L9.4 15.6 L12.2 21.5 L15.1 20.1 L12.4 14.4 L18.5 14.1 Z"
+                fill="#111827" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/>
+        </svg>
+        <span class="cursor-onda"></span>
+      </div>
+
+      <div class="pila" aria-hidden="true"></div>
+
+      <div class="cierre">
+        <p class="cierre-pre">Hoy es un día especial</p>
+        <h1 class="cierre-titulo">¡Feliz cumpleaños, <span>Victor</span>!</h1>
+      </div>
+    </div>
+
+    <p class="salva-pista">Toca la pantalla para abrir tus cartas</p>
+    <svg class="arbol-deco arbol-izq" aria-hidden="true"><use href="#arbol"/></svg>
+    <svg class="arbol-deco arbol-der" aria-hidden="true"><use href="#arbol"/></svg>
+  </section>
+
+  <!-- ============ Cartas ============ -->
+  <main id="cartas" class="cartas" aria-label="Cartas para Victor">
+    <div class="nieve" aria-hidden="true"></div>
+
+    <!-- Menú lateral (solo escritorio): la lista de cartas, se oculta con la hamburguesa. -->
+    <aside class="lateral" id="lateral" aria-label="Lista de cartas">
+      <p class="lateral-titulo">Cartas</p>
+      <ol class="lateral-lista" id="lateral-lista"></ol>
+    </aside>
+
+    <div class="contenido">
+      <header class="cartas-cabecera">
+        <button class="hamburguesa" id="hamburguesa" aria-label="Mostrar u ocultar la lista de cartas" aria-controls="lateral" aria-expanded="true">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </button>
+        <svg class="arbol-mini" aria-hidden="true"><use href="#arbol"/></svg>
+        <h2>Cartas para Victor</h2>
+        <svg class="arbol-mini" aria-hidden="true"><use href="#arbol"/></svg>
+      </header>
+
+      <div class="carrusel" id="carrusel">
+        <div class="pista" id="pista"></div>
+        <!-- Flechas sobre el contenido (solo escritorio). -->
+        <button class="flecha flecha-lado flecha-izq" data-ir="-1" aria-label="Carta anterior">
+          <svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="flecha flecha-lado flecha-der" data-ir="1" aria-label="Carta siguiente">
+          <svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <!-- Paginador de abajo (solo celular). -->
+      <nav class="navegacion" aria-label="Cambiar de carta">
+        <button class="flecha" data-ir="-1" aria-label="Carta anterior">
+          <svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <ol class="nombres" id="nombres"></ol>
+        <button class="flecha" data-ir="1" aria-label="Carta siguiente">
+          <svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </nav>
+    </div>
+  </main>
+
+  <!-- Visor para leer una carta ampliada (sobre todo en el celular). -->
+  <div class="visor" id="visor" hidden role="dialog" aria-modal="true" aria-label="Carta ampliada">
+    <button class="visor-cerrar" id="visor-cerrar" aria-label="Cerrar">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+    </button>
+    <div class="visor-scroll" id="visor-scroll"></div>
+  </div>
+
+  <script src="datos.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
