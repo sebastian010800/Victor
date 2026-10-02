@@ -184,6 +184,16 @@ window.DATOS = {
           "h": 1509
         }
       ]
+    },
+    {
+      "nombre": "Karen",
+      "paginas": [
+        {
+          "src": "Cartas/karen-1.jpg",
+          "w": 1131,
+          "h": 1600
+        }
+      ]
     }
   ],
   "meraki": {
