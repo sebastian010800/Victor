@@ -682,6 +682,16 @@ button { font: inherit; }
   object-fit: contain;
   box-shadow: 0 0 0 3px var(--crema), 0 0 0 5px var(--rojo);
 }
+/* Botón de ampliar encima del video, en la esquina de arriba para no tapar
+   los controles de reproducción. */
+.galeria-item.video { position: relative; }
+.ampliar-video {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  bottom: auto;
+  margin: 0;
+}
 .galeria-item figcaption {
   margin-top: 10px;
   font-family: var(--serif);
@@ -690,11 +700,36 @@ button { font: inherit; }
   color: var(--verde);
 }
 
+/* Flechas para pasar de foto en foto; con las cartas no se muestran. */
+.visor-flecha {
+  position: fixed;
+  top: 50%;
+  z-index: 1;
+  display: none;
+  transform: translateY(-50%);
+}
+.visor-foto .visor-flecha { display: grid; }
+.visor-flecha:active:not(:disabled) { transform: translateY(-50%) scale(0.94); }
+.visor-flecha:disabled { opacity: 0; pointer-events: none; }
+.visor-anterior { left: max(12px, env(safe-area-inset-left)); }
+.visor-siguiente { right: max(12px, env(safe-area-inset-right)); }
+
 /* Una foto en el visor se ve entera, encajada en la pantalla. */
 .visor-foto .visor-scroll {
   display: grid;
   place-items: center;
   padding: 16px;
+}
+/* En escritorio, espacio a los lados para que las flechas no tapen la foto. */
+@media (min-width: 900px) {
+  .visor-foto .visor-scroll { padding: 16px 88px; }
+}
+.visor-foto .visor-scroll video {
+  display: block;
+  max-width: 100%;
+  max-height: calc(var(--alto) - 32px);
+  border-radius: 12px;
+  background: #000;
 }
 .visor-foto .visor-scroll img {
   width: auto;

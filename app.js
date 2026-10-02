@@ -237,10 +237,18 @@
   const visorScroll = $("#visor-scroll");
   let focoAntesDelVisor = null;
 
-  function abrirVisor(paginas, nombre, desde = 0) {
+  // Un video sacado del visor puede seguir sonando si no se pausa antes.
+  function vaciarVisor() {
+    const video = visorScroll.querySelector("video");
+    if (video) video.pause();
     visorScroll.innerHTML = "";
+  }
+
+  function abrirVisor(paginas, nombre, desde = 0) {
+    vaciarVisor();
     visorScroll.append(...crearPaginas(paginas, nombre).map((img) => ((img.style.cursor = "auto"), img)));
-    focoAntesDelVisor = document.activeElement;
+    // Al pasar de foto el visor ya está abierto: el foco a devolver es el de antes.
+    if (visor.hidden) focoAntesDelVisor = document.activeElement;
     visor.hidden = false;
     // Abre en la página tocada, no siempre en la primera.
     requestAnimationFrame(() => {
@@ -250,16 +258,68 @@
     });
     $("#visor-cerrar").focus({ preventScroll: true });
   }
-  function abrirFoto(foto) {
-    abrirVisor([foto], "Victor");
+  // Fotos y videos de la galería: con flechas se pasa de uno a otro sin
+  // cerrar el visor, en el mismo orden en que aparecen en la galería.
+  let mediosVisor = [];
+  let medioVisor = 0;
+  function abrirMedio(medios, i, desdeSegundo = 0) {
+    mediosVisor = medios;
+    medioVisor = i;
+    const m = medios[i];
+    if (m.tipo === "video") {
+      if (visor.hidden) focoAntesDelVisor = document.activeElement;
+      vaciarVisor();
+      const video = document.createElement("video");
+      video.src = m.src;
+      video.controls = true;
+      video.playsInline = true;
+      video.autoplay = true;
+      video.setAttribute("aria-label", `Video ${i + 1} de ${medios.length}`);
+      if (desdeSegundo) video.addEventListener("loadedmetadata", () => (video.currentTime = desdeSegundo), { once: true });
+      visorScroll.appendChild(video);
+      visor.hidden = false;
+      $("#visor-cerrar").focus({ preventScroll: true });
+    } else {
+      abrirVisor([m], "Victor");
+      visorScroll.firstChild.alt = `Foto ${i + 1} de ${medios.length}`;
+    }
     visor.classList.add("visor-foto");
-    visorScroll.firstChild.alt = "Foto ampliada";
+    $("#visor-anterior").disabled = i === 0;
+    $("#visor-siguiente").disabled = i === medios.length - 1;
   }
+  function moverFoto(paso) {
+    const i = medioVisor + paso;
+    if (!visor.classList.contains("visor-foto") || i < 0 || i >= mediosVisor.length) return;
+    const foco = document.activeElement;
+    abrirMedio(mediosVisor, i);
+    // Que el foco siga en la flecha usada, para poder seguir con Enter.
+    if (foco && foco.classList.contains("visor-flecha") && !foco.disabled) foco.focus({ preventScroll: true });
+  }
+  $("#visor-anterior").addEventListener("click", () => moverFoto(-1));
+  $("#visor-siguiente").addEventListener("click", () => moverFoto(1));
+  // En el celular también se pasa deslizando de lado.
+  let toqueVisor = null;
+  visor.addEventListener("touchstart", (e) => {
+    // Arrastrar la barra de un video no debe cambiar de foto.
+    if (e.touches.length !== 1 || e.target.closest("video")) return (toqueVisor = null);
+    toqueVisor = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, { passive: true });
+  visor.addEventListener("touchend", (e) => {
+    if (!toqueVisor) return;
+    const dx = e.changedTouches[0].clientX - toqueVisor.x;
+    const dy = e.changedTouches[0].clientY - toqueVisor.y;
+    toqueVisor = null;
+    // Con zoom de dedos el gesto es para moverse dentro de la foto.
+    if (window.visualViewport && visualViewport.scale > 1.05) return;
+    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) moverFoto(dx < 0 ? 1 : -1);
+  }, { passive: true });
+
   function cerrarVisor() {
     if (visor.hidden) return;
     visor.hidden = true;
     visor.classList.remove("visor-foto");
-    visorScroll.innerHTML = "";
+    mediosVisor = [];
+    vaciarVisor();
     if (focoAntesDelVisor) focoAntesDelVisor.focus({ preventScroll: true });
   }
   $("#visor-cerrar").addEventListener("click", cerrarVisor);
@@ -344,7 +404,11 @@
     const grilla = document.createElement("div");
     grilla.className = "galeria-grilla";
 
+    // Lo que se recorre en el visor, en el orden de la grilla.
+    const medios = [];
+
     const crearVideo = (v) => {
+      const indice = medios.push({ tipo: "video", src: v.src }) - 1;
       const figura = document.createElement("figure");
       figura.className = "galeria-item video";
       const video = document.createElement("video");
@@ -360,6 +424,18 @@
       // Uno a la vez: si arranca uno, se pausan los demás.
       video.addEventListener("play", () => videos.forEach((o) => o !== video && o.pause()));
       figura.appendChild(video);
+      const ampliar = document.createElement("button");
+      ampliar.className = "ampliar ampliar-video";
+      ampliar.type = "button";
+      ampliar.innerHTML = `${ICONO_LUPA}<span>Ampliar</span>`;
+      ampliar.setAttribute("aria-label", v.titulo ? `Ampliar el video ${v.titulo}` : "Ampliar el video");
+      ampliar.addEventListener("click", () => {
+        // Sigue en el visor desde donde iba, en vez de empezar de cero.
+        const desde = video.paused ? 0 : video.currentTime;
+        pausarVideos();
+        abrirMedio(medios, indice, desde);
+      });
+      figura.appendChild(ampliar);
       if (v.titulo) {
         const pie = document.createElement("figcaption");
         pie.textContent = v.titulo;
@@ -370,6 +446,7 @@
     };
 
     const crearFoto = (f, i) => {
+      const indice = medios.push({ tipo: "foto", ...f }) - 1;
       const figura = document.createElement("figure");
       figura.className = "galeria-item";
       const img = document.createElement("img");
@@ -378,7 +455,7 @@
       img.height = f.h;
       img.alt = `Foto ${i + 1}`;
       img.decoding = "async";
-      img.addEventListener("click", () => abrirFoto(f));
+      img.addEventListener("click", () => abrirMedio(medios, indice));
       figura.appendChild(img);
       return figura;
     };
@@ -546,7 +623,8 @@
   // actividad, y el conteo no se descuadra si la pestaña estuvo en segundo plano.
   setInterval(() => {
     if (enSalva) return;
-    if (videos.some((v) => !v.paused && !v.ended)) return reiniciarInactividad();
+    const enVisor = visorScroll.querySelector("video");
+    if ([...videos, enVisor].some((v) => v && !v.paused && !v.ended)) return reiniciarInactividad();
     if (Date.now() - ultimaActividad >= INACTIVIDAD_MS) mostrarSalva();
   }, 5000);
 
@@ -555,6 +633,8 @@
   addEventListener("keydown", (e) => {
     if (!visor.hidden) {
       if (e.key === "Escape") cerrarVisor();
+      if (e.key === "ArrowRight") moverFoto(1);
+      if (e.key === "ArrowLeft") moverFoto(-1);
       return;
     }
     if (enSalva) {
