@@ -45,10 +45,10 @@ PERSONAS = [
     ("Melan", ["melan"]),
     ("Laura", ["laura"]),
     ("Alejo", ["alejo", "alejandro"]),
+    ("Karen", ["karen"]),
     ("Fede", ["fede", "federico"]),
     ("Sebastian", ["sebastian", "sebas"]),
     ("Natalia", ["natalia"]),
-    ("Karen", ["karen"]),
 ]
 MERAKI = ("Meraki", ["meraki"])
 
